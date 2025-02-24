@@ -23,7 +23,7 @@ const Dashboard = () => {
           <Link to="/explore" className="sidebar-item">🔍 Explore</Link>
           <Link to="/notifications" className="sidebar-item">🔔 Notifications</Link>
           <Link to="/messages" className="sidebar-item">✉️ Messages</Link>
-          <Link to="/profile" className="sidebar-item">👤 Profile</Link>
+          <Link to="/user/${user.username}" className="sidebar-item">👤 Profile</Link>
           <button className="post-button">Post</button>
         </div>
       </div>
