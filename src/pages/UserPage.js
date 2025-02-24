@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import User from '../components/User';
 import '../components/User.css';
 
 const UserPage = () => {
     const [user, setUser] = useState(null);
+    const { username } = useParams(); // Get username from URL
   
     useEffect(() => {
       // Simulated API call
       setTimeout(() => {
         setUser({
           name: "John Doe",
-          username: "johndoe",
+          username: username,
           avatar: "https://via.placeholder.com/80",
           bio: "4th Year CompSci.",
           posts: [

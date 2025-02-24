@@ -19,7 +19,6 @@ const Dashboard = () => {
           <img src="/Badge.jpg" alt="Badge" className="badge-img" />
         </div>
         <div className="sidebar-links">
-          <Link to="/home" className="sidebar-item">🏠 Home</Link>
           <Link to="/explore" className="sidebar-item">🔍 Explore</Link>
           <Link to="/notifications" className="sidebar-item">🔔 Notifications</Link>
           <Link to="/messages" className="sidebar-item">✉️ Messages</Link>
