@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import './Register.css';
 
 const Register = () => {
+    const { register } = useContext(AuthContext); 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -13,7 +15,7 @@ const Register = () => {
             alert('Passwords do not match');
             return;
         }
-        console.log('Registering with:', email, password);
+        register(email, password); 
     };
 
     return (
