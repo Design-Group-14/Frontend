@@ -36,9 +36,9 @@ const User = ({ user }) => {
               <div>
                 <h2>{user.name}</h2>
                 <p>@{user.username}</p>
+                <p className="user-bio">{user.bio}</p>
               </div>
             </div>
-            <p className="user-bio">{user.bio}</p>
             <div className="separator"></div>
 
 

@@ -7,6 +7,8 @@
   }
   
   .user-header {
+    background-color: white;
+    color: black;
     padding: 15px;
     border-radius: 15px;
     width: 80%;
