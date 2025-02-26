@@ -13,7 +13,7 @@ const UserPage = () => {
         setUser({
           name: "John Doe",
           username: "DohnJoe",
-          avatar: "https://via.placeholder.com/80",
+          avatar: "https://media.istockphoto.com/id/175440771/photo/handsome-young-man-gesturing-thumbs-up-isolated.jpg?s=612x612&w=0&k=20&c=RMLEXPrDjwFg7uPb_Ri3KqpYF0BAEPjzloAB81viyCk=",
           bio: "4th Year CompSci.",
           posts: [
             { id: 1, content: "Hello world! First post!", date: "Feb 24, 2025" },
