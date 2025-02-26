@@ -12,7 +12,7 @@ const UserPage = () => {
       setTimeout(() => {
         setUser({
           name: "John Doe",
-          username: username,
+          username: "DohnJoe",
           avatar: "https://via.placeholder.com/80",
           bio: "4th Year CompSci.",
           posts: [
