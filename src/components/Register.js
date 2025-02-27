@@ -2,6 +2,8 @@ import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import './Register.css';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 
 const Register = () => {
     const { register } = useContext(AuthContext); 
@@ -9,13 +11,23 @@ const Register = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
         if (password !== confirmPassword) {
             alert('Passwords do not match');
             return;
         }
-        register(email, password); 
+        try{
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+            console.log(userCredential)
+            const user = userCredential.user
+            localStorage.setItem('token', user.accessToken)
+            localStorage.setItem('user', JSON.stringify(user))
+            console.log("REGISTERED")
+            register(email, password);
+        }catch(error){
+            console.error(error)
+        } 
     };
 
     return (

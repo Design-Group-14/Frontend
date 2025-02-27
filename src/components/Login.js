@@ -2,15 +2,27 @@ import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext'; 
 import './Login.css';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 
 const Login = () => {
     const { login } = useContext(AuthContext); 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
-        login(email, password); 
+         try{
+            const userCredential = await signInWithEmailAndPassword(auth, email, password)
+            console.log(userCredential)
+            const user = userCredential.user
+            localStorage.setItem('token', user.accessToken)
+            localStorage.setItem('user', JSON.stringify(user))
+            console.log("REGISTERED")
+            login(email, password); 
+        }catch(error){
+            console.error(error)
+        } 
     };
 
     return (
