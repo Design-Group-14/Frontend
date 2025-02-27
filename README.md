@@ -9,7 +9,7 @@ Create an account, browse your empty dashboard and view your boilerplate user in
 
 We are using Firebase to authenticate users using their email and password service. Information about Users and their posts are stored on our postgreSQL database. To send requests to it, you must first get our django backend running (explained in our readme here -> https://github.com/Design-Group-14/Backend). 
 
-## How to Run
+## Step by Step
 
 You will need Node.Js (latest version preferred) installed.
 
@@ -24,7 +24,7 @@ Project is now running on `http://localhost:3000`. Congrats!
 
 First create an account (any formatting errors should be printed to browser console). <br> After logging in, you should automatically be brought to your dashboard. <br> If you check console, we automatically send a request to retrieve all latest posts in database. These are test values in our database but we wanted to demonstrate that we can retrieve posts in our database from our frontend. <br> You can also click on your account but it currently only holds boilerplate values.
 
-#### Backend
+#### Backends
 
 Firebase - go to https://firebase.google.com/. Click on go to console and login using these credentials.
 Email - Group14TCD@gmail.com
