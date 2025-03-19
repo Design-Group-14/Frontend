@@ -5,7 +5,7 @@ const PostBox = () => {
 
   const handlePost = () => {
     console.log("Posting:", post);
-    setPost(""); // Clear input after posting
+    setPost(""); // ✅ Clear input after posting
   };
 
   return (
