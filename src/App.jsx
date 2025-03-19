@@ -1,30 +1,44 @@
 import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import LeftNavbar from "./components/LeftNavbar";
+import SearchField from "./components/SearchFields";
+import TrendingTopics from "./components/TrendingTopics";
+import SuggestedUsers from "./components/SuggestedUser";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import Dashboard from "./pages/Dashboard";
 
-const PostBox = () => {
-  const [post, setPost] = useState("");
+import "./App.css";
 
-  const handlePost = () => {
-    console.log("Posting:", post);
-    setPost(""); // Clear input after posting
-  };
+function App() {
+    const [currentView, setCurrentView] = useState("home");
 
-  return (
-    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
-      <h2 className="text-lg font-semibold text-gray-700 mb-2">What's happening?</h2>
-      <textarea
-        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="Write a post..."
-        value={post}
-        onChange={(e) => setPost(e.target.value)}
-      />
-      <button
-        onClick={handlePost}
-        className="mt-3 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
-      >
-        Post
-      </button>
-    </div>
-  );
-};
+    return (
+        <Router>
+            <div className="flex min-h-screen">
+                {/* ✅ Left Sidebar */}
+                <LeftNavbar />
 
-export default PostBox;
+                {/* ✅ Main Content Area (Center) */}
+                <div className="flex-grow flex justify-center items-center px-20">
+                    <Routes>
+                        <Route path="/" element={<HomePage setCurrentView={setCurrentView} />} />
+                        <Route path="/login" element={<LoginPage setCurrentView={setCurrentView} />} />
+                        <Route path="/register" element={<RegisterPage setCurrentView={setCurrentView} />} />
+                        <Route path="/dashboard" element={<Dashboard />} />
+                    </Routes>
+                </div>
+
+                {/* ✅ Right Sidebar - Search, Trends, Suggested Users */}
+                <div className="w-80 bg-white shadow-lg p-6 flex flex-col space-y-6 fixed right-0 top-0 h-full">
+                    <SearchField />
+                    <TrendingTopics />
+                    <SuggestedUsers />
+                </div>
+            </div>
+        </Router>
+    );
+}
+
+export default App;
