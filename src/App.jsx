@@ -4,6 +4,7 @@ import LeftNavbar from "./components/LeftNavbar";
 import SearchField from "./components/SearchFields";
 import TrendingTopics from "./components/TrendingTopics";
 import SuggestedUsers from "./components/SuggestedUser";
+import SearchBar from "./components/SearchBar";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -60,13 +61,8 @@ function AppContent({ isAuthenticated, setIsAuthenticated }) {
                 </Routes>
             </div>
 
-            {showFullLayout && (
-                <div className="w-80 bg-white shadow-lg p-6 flex flex-col space-y-6 fixed right-0 top-0 h-full">
-                    <SearchField />
-                    <TrendingTopics />
-                    <SuggestedUsers />
-                </div>
-            )}
+            {showFullLayout && <SearchBar setIsAuthenticated={setIsAuthenticated} />}
+
         </div>
     );
 }
