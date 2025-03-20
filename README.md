@@ -19,8 +19,8 @@ Before you run this, the django backend must be running to respond to requests -
 1. Clone this repo
 2. Navigate to this repo on your machine
 3. install dependencies - `npm install`
-4. start dev server -`npm start `
-Project is now running on `http://localhost:3000`. Congrats!
+4. start dev server -`npm run dev `
+Project is now running on the link that is provided on your terminal. Congrats!
 
 First create an account (any formatting errors should be printed to browser console). <br> After logging in, you should automatically be brought to your dashboard. <br> If you check console, we automatically send a request to retrieve all latest posts in database. These are test values in our database but we wanted to demonstrate that we can retrieve posts in our database from our frontend. <br> You can also click on your account but it currently only holds boilerplate values.
 
