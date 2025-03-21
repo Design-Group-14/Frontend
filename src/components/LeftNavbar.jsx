@@ -1,13 +1,13 @@
 import { Home, Bell, Mail, User, PlusCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import Badge from '../assets/Badge.jpg'
+import Badge from '../assets/Badge.jpg';
 
-const Navbar = () => {
+const Navbar = ({ notificationCount }) => {
   return (
     <nav className="fixed top-0 left-0 h-full w-64 bg-white shadow-lg p-6 flex flex-col justify-between">
       {/* Logo */}
       <div>
-        <img src={ Badge } className="w-full"></img>
+        <img src={Badge} className="w-full" alt="Badge" />
       </div>
 
       {/* Navigation Links */}
@@ -18,18 +18,21 @@ const Navbar = () => {
             <span className="text-lg">Explore</span>
           </Link>
         </li>
+
         <li>
-          <Link to="/notifications" className="flex items-center text-gray-700 hover:text-blue-500">
+          <Link to="/notifications" className="flex items-center text-gray-700 hover:text-blue-500 relative">
             <Bell className="w-6 h-6 mr-3" />
             <span className="text-lg">Notifications</span>
           </Link>
         </li>
+
         <li>
           <Link to="/messages" className="flex items-center text-gray-700 hover:text-blue-500">
             <Mail className="w-6 h-6 mr-3" />
             <span className="text-lg">Messages</span>
           </Link>
         </li>
+
         <li>
           <Link to="/profile" className="flex items-center text-gray-700 hover:text-blue-500">
             <User className="w-6 h-6 mr-3" />
