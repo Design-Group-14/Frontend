@@ -1,75 +1,83 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 const ChatPage = () => {
-  const { id } = useParams(); // Get friend's ID from URL
+  const { id } = useParams(); // Get friend ID from URL
+  const navigate = useNavigate();
   const [friend, setFriend] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
 
   useEffect(() => {
-    // Simulated friend data
-    const friends = [
+    // Simulated friend data (Replace with API call)
+    const friendsData = [
       { id: 1, name: "Alice Johnson", avatar: "https://i.pravatar.cc/50?img=1" },
       { id: 2, name: "Mark Lee", avatar: "https://i.pravatar.cc/50?img=2" },
-      { id: 3, name: "John Smith", avatar: "https://i.pravatar.cc/50?img=3" },
+      { id: 3, name: "John Doe", avatar: "https://i.pravatar.cc/50?img=3" },
     ];
+    const friendData = friendsData.find((f) => f.id === parseInt(id));
+    setFriend(friendData);
 
-    const selectedFriend = friends.find((f) => f.id === parseInt(id));
-    setFriend(selectedFriend);
-
-    // Simulated chat history
+    // Simulated chat messages (Replace with actual chat API)
     setMessages([
-      { sender: "You", text: "Hey, how’s it going?" },
-      { sender: selectedFriend?.name, text: "Pretty good! You?" },
-      { sender: "You", text: "Just working on my project." },
+      { sender: "Alice Johnson", text: "Hey, how’s it going?" },
+      { sender: "You", text: "All good! What about you?" },
     ]);
   }, [id]);
 
-  // ✅ Function to send a new message
   const sendMessage = () => {
     if (!newMessage.trim()) return;
-
-    const newMsg = { sender: "You", text: newMessage };
-    setMessages([...messages, newMsg]); // ✅ Instantly updates the UI
-    setNewMessage(""); // ✅ Clear input field
+    setMessages([...messages, { sender: "You", text: newMessage }]);
+    setNewMessage("");
   };
 
-  if (!friend) return <p className="text-center text-gray-600">Loading chat...</p>;
+  if (!friend) return <p className="text-center text-gray-500">Loading chat...</p>;
 
   return (
     <div className="w-full max-w-3xl mx-auto p-6">
-      <div className="flex items-center mb-4">
-        <img src={friend.avatar} alt={friend.name} className="w-12 h-12 rounded-full mr-3" />
-        <h2 className="text-xl font-bold">{friend.name}</h2>
+      {/* ✅ Back Button */}
+      <button 
+        onClick={() => navigate("/messages")}
+        className="flex items-center text-gray-700 hover:text-blue-500 mb-4"
+      >
+        <ArrowLeft className="w-5 h-5 mr-2" />
+        Back
+      </button>
+
+      {/* Chat Header */}
+      <div className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-md">
+        <img src={friend.avatar} alt={friend.name} className="w-12 h-12 rounded-full" />
+        <h2 className="text-xl font-semibold">{friend.name}</h2>
       </div>
 
-      {/* Messages Display */}
-      <div className="bg-gray-100 p-4 rounded-lg h-96 overflow-y-auto">
+      {/* Chat Messages */}
+      <div className="bg-gray-100 p-4 rounded-lg shadow mt-4 h-80 overflow-y-auto">
         {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`p-2 my-1 max-w-xs rounded-lg ${
-              msg.sender === "You" ? "bg-blue-500 text-white ml-auto" : "bg-white text-black"
-            }`}
+          <div 
+            key={index} 
+            className={`p-2 my-2 rounded-lg ${
+              msg.sender === "You" ? "bg-blue-500 text-white ml-auto" : "bg-white text-gray-700"
+            } w-fit max-w-xs`}
           >
-            <p className="text-sm">{msg.text}</p>
+            <strong>{msg.sender !== "You" && msg.sender + ": "}</strong>
+            {msg.text}
           </div>
         ))}
       </div>
 
-      {/* Send Message Input */}
-      <div className="mt-4 flex">
+      {/* Message Input */}
+      <div className="mt-4 flex items-center">
         <input
           type="text"
-          className="flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-grow p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Type a message..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
         />
         <button
           onClick={sendMessage}
-          className="bg-blue-500 text-white px-4 rounded-r-lg hover:bg-blue-600"
+          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
         >
           Send
         </button>
