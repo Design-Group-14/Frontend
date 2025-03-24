@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import PostCard from "../components/PostsCard";
 
 const allPosts = [
@@ -36,19 +36,28 @@ const allPosts = [
   },
 ];
 
-const PostPage = () => {
+function PostPage() {
   const { id } = useParams();
-  const post = allPosts.find((p) => p.id === parseInt(id));
+  const navigate = useNavigate();
 
+  const post = allPosts.find((p) => p.id === parseInt(id));
   if (!post) {
     return <div className="text-center text-red-500 text-xl mt-20">Post not found</div>;
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4">
+      {/* Back Button: add ml-64 to push it to the right */}
+      <button
+        onClick={() => navigate(-1)}
+        className="self-start mb-4 ml-20 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+      >
+        ← Back
+      </button>
+
       <PostCard post={post} />
     </div>
   );
-};
+}
 
 export default PostPage;

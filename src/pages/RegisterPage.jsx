@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import { createUserWithEmailAndPassword, updateProfile, deleteUser } from "firebase/auth";
+import { db } from "../firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 const RegisterPage = ({ setIsAuthenticated }) => {
   const [email, setEmail] = useState("");
@@ -21,6 +23,17 @@ const RegisterPage = ({ setIsAuthenticated }) => {
       // ✅ Update the user's display name in Firebase Auth
       await updateProfile(user, {
         displayName: `${firstName} ${lastName}`,
+      });
+
+      //Store user details in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        firstName,
+        lastName,
+        email,
+        course,
+        // any other fields you want
+        createdAt: new Date().toISOString(),
       });
 
       // ✅ Store user details in localStorage
