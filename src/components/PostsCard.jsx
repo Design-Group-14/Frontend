@@ -11,11 +11,24 @@ const PostCard = ({ post }) => {
     // Optional: Send API request to backend here
   };
 
-  const handleShare = () => {
-    const shareText = `${post.title} - ${post.content}`;
-    navigator.clipboard.writeText(shareText);
-    alert("Post copied to clipboard!");
-    // Optional: Implement Web Share API if you want native share dialog
+  const handleShare = (e) => {
+    e.stopPropagation();
+    const shareData = {
+      title: post.title,
+      text: post.content,
+      url: window.location.origin + `/post/${post.id}`,
+    };
+  
+    if (navigator.share) {
+      navigator
+        .share(shareData)
+        .then(() => console.log("Post shared successfully"))
+        .catch((error) => console.error("Sharing failed:", error));
+    } else {
+      // Fallback for unsupported browsers
+      navigator.clipboard.writeText(shareData.url);
+      alert("Share not supported on this browser. Link copied to clipboard!");
+    }
   };
 
   return (
@@ -65,6 +78,7 @@ const PostCard = ({ post }) => {
 
 PostCard.propTypes = {
   post: PropTypes.shape({
+    id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     content: PropTypes.string.isRequired,
     image_url: PropTypes.string,
