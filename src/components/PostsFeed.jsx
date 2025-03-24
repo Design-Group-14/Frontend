@@ -1,5 +1,6 @@
-import React from "react";
 import PostCard from "./PostsCard"; // ✅ Correct import
+import PropTypes from "prop-types"; 
+
 
 const PostsFeed = ({ type = "friends" }) => {
   console.log("Rendering PostsFeed with type:", type);
@@ -48,6 +49,10 @@ const PostsFeed = ({ type = "friends" }) => {
       ))}
     </div>
   );
+};
+
+PostsFeed.propTypes = {
+  type: PropTypes.string
 };
 
 export default PostsFeed;
