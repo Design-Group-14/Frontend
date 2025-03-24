@@ -1,57 +1,86 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import PostCard from "./PostsCard"; // ✅ Correct import
+import { useState } from "react";
+import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 
-const PostsFeed = ({ type = "friends" }) => { 
-  console.log("Rendering PostsFeed with type:", type); // ✅ Debugging
+const PostCard = ({ post }) => {
+  const navigate = useNavigate();
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(post.likes || 0);
 
-  // Example post data
-  const allPosts = [
-    {
-      id: 1,
-      title: "Weekend Vibes",
-      content: "Excited for the weekend! 🎉",
-      image_url: "https://cdn2.hubspot.net/hubfs/364394/blogs/Admit-A-Bull/images/blog-post/080618-the-importance-of-sleep-for-college-students/the-importance-of-sleep-for-college-students-index.jpg",
-      location: "Dublin, Ireland",
-      user: "Alice Johnson",
-    },
-    {
-      id: 2,
-      title: "Project Complete!",
-      content: "Just finished my project! 💻",
-      image_url: "https://www.universityofcalifornia.edu/sites/default/files/styles/article_default_banner/public/college_voting_faq_header.jpg?h=7eca08bd&itok=3bUKecU1",
-      location: "San Francisco, USA",
-      user: "Mark Lee",
-    },
-    {
-      id: 3,
-      title: "Sunset Bliss",
-      content: "Beautiful sunset today! 🌅",
-      image_url: "https://due.uci.edu/files/2017/08/uci_beach_august_nl.png",
-      location: "Paris, France",
-      user: "Sophia Wang",
-    },
-    {
-      id: 4,
-      title: "Game Night!",
-      content: "Anyone up for a game night? 🎲",
-      image_url: "https://www.usnews.com/object/image/00000190-3ba9-d6ee-a7ff-7fbb4cfe0000/gettyimages-1473712269.jpg?update-time=1718987895511&size=responsive640",
-      location: "New York, USA",
-      user: "John Doe",
-    },
-  ];
+  const handleLike = (e) => {
+    e.stopPropagation();
+    setLiked(!liked);
+    setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
+  };
 
-  const posts = type === "friends" ? allPosts.slice(0, 2) : allPosts; // ✅ Show all for "all" type
+  const handleShare = (e) => {
+    e.stopPropagation();
+    const shareText = `${post.title} - ${post.content}`;
+    navigator.clipboard.writeText(shareText);
+    alert("Post copied to clipboard!");
+  };
+
+  const handleClick = () => {
+    navigate(`/post/${post.id}`);
+  };
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4 space-y-4">
-      {posts.map((post) => (
-        <Link key={post.id} to={`/post/${post.id}`} className="block hover:opacity-80 transition">
-          <PostCard post={post} />
-        </Link>
-      ))}
+    <div
+      onClick={handleClick}
+      className="bg-white shadow-lg rounded-2xl p-4 max-w-lg w-full cursor-pointer hover:opacity-90 transition"
+    >
+      {post.image_url ? (
+        <img
+          src={post.image_url}
+          alt={post.title}
+          className="w-full h-48 object-cover rounded-xl"
+        />
+      ) : (
+        <div className="w-full h-48 bg-gray-200 rounded-xl flex items-center justify-center text-gray-500">
+          No Image
+        </div>
+      )}
+
+      <div className="mt-4">
+        <h2 className="text-xl font-bold text-gray-900">{post.title}</h2>
+        <p className="text-gray-700 mt-2">{post.content}</p>
+      </div>
+
+      {post.location && (
+        <div className="mt-4 text-sm text-gray-500">
+          📍 <span>{post.location}</span>
+        </div>
+      )}
+
+      <div className="mt-4 flex justify-between items-center">
+        <button
+          onClick={handleLike}
+          className={`px-4 py-2 rounded-xl text-sm font-medium ${
+            liked ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-600"
+          }`}
+        >
+          ❤️ {liked ? "Liked" : "Like"} ({likeCount})
+        </button>
+        <button
+          onClick={handleShare}
+          className="px-4 py-2 bg-blue-100 text-blue-600 rounded-xl text-sm font-medium"
+        >
+          🔗 Share
+        </button>
+      </div>
     </div>
   );
 };
 
-export default PostsFeed;
+PostCard.propTypes = {
+  post: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    content: PropTypes.string.isRequired,
+    image_url: PropTypes.string,
+    location: PropTypes.string,
+    likes: PropTypes.number,
+  }).isRequired,
+};
+
+export default PostCard;
