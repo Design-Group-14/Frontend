@@ -4,6 +4,8 @@ import Badge from '../assets/Badge.jpg';
 import SearchField from "./SearchFields";
 import TrendingTopics from "./TrendingTopics";
 import SuggestedUsers from "./SuggestedUser";
+import { Search } from "lucide-react";
+import React, { useState } from "react";
 
 const Navbar = ({ setIsAuthenticated }) => {
   const navigate = useNavigate();

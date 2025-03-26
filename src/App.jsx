@@ -15,6 +15,9 @@ import ProfilePage from "./pages/ProfilePage";
 import MessagesPage from "./pages/MessagesPage"; 
 import NotificationsPage from "./pages/NotificationsPage"; 
 import ChatPage from "./pages/ChatPage";
+import SearchPage from "./pages/SearchPage";
+import SearchFiltersRightPanel from "./components/SearchFiltersRIghtPanel";
+
 
 import "./App.css";
 
@@ -43,7 +46,14 @@ function AppContent({ isAuthenticated, setIsAuthenticated }) {
       location.pathname === "/dashboard" ||
       location.pathname === "/profile" ||
       location.pathname === "/messages" || 
-      location.pathname === "/notifications"); 
+      location.pathname === "/notifications" ||
+      location.pathname === "/search");
+
+  const isSearchPage = location.pathname === "/search";
+  const [onlyFriends, setOnlyFriends] = useState(false);
+  const [nearMe, setNearMe] = useState(false);
+  const [inMyCourse, setInMyCourse] = useState(false);
+  const [recent, setRecent] = useState(false);
 
   return (
     <div className="flex min-h-screen">
@@ -82,10 +92,32 @@ function AppContent({ isAuthenticated, setIsAuthenticated }) {
             path="/notifications"
             element={isAuthenticated ? <NotificationsPage /> : <Navigate to="/" />}
           />
+          <Route
+            path="/search"
+             // Pass the filter states so you can use them in SearchPage
+            element={isAuthenticated ? (<SearchPage onlyFriends={onlyFriends} nearMe={nearMe} inMyCourse={inMyCourse} recent={recent}/>) : (<Navigate to="/" />)}/>
         </Routes>
       </div>
 
-      {showFullLayout && <SearchBar setIsAuthenticated={setIsAuthenticated} />}
+      {showFullLayout && (
+        isSearchPage
+          ? (
+            <SearchFiltersRightPanel
+              setIsAuthenticated={setIsAuthenticated}
+              // Pass filter states and setters so the checkboxes can update them
+              onlyFriends={onlyFriends}
+              setOnlyFriends={setOnlyFriends}
+              nearMe={nearMe}
+              setNearMe={setNearMe}
+              inMyCourse={inMyCourse}
+              setInMyCourse={setInMyCourse}
+              recent={recent}
+              setRecent={setRecent}
+            />
+          ) : (
+            <SearchBar setIsAuthenticated={setIsAuthenticated} />
+          )
+      )}
     </div>
   );
 }
