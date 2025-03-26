@@ -1,173 +1,111 @@
-// src/pages/SearchPage.jsx
-
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
-import PostCard from "../components/PostsCard"; // ✅ Import your PostCard
-import { db } from "../firebase";
-import { collection, getDocs } from "firebase/firestore";
-// Example user data (if you want to search for users)
-const MOCK_USERS = [
-  {
-    id: 101,
-    username: "Alice Johnson",
-    friend: true,
-    location: "Dublin, Ireland",
-    course: "CS",
-    date: "2023-02-05",
-  },
-  {
-    id: 102,
-    username: "Mark Lee",
-    friend: false,
-    location: "San Francisco, USA",
-    course: "Business",
-    date: "2023-02-10",
-  },
-  {
-    id: 103,
-    username: "Sophia Wang",
-    friend: true,
-    location: "Paris, France",
-    course: "CS",
-    date: "2023-03-01",
-  },
-  {
-    id: 104,
-    username: "John Doe",
-    friend: false,
-    location: "New York, USA",
-    course: "Engineering",
-    date: "2023-03-10",
-  },
-];
+import PostCard from "../components/PostsCard";
 
-// Updated posts that include all filter fields (friend, course, date)
-const allPosts = [
-  {
-    id: 1,
-    title: "Weekend Vibes",
-    content: "Excited for the weekend! 🎉",
-    image_url:
-      "https://cdn2.hubspot.net/hubfs/364394/blogs/Admit-A-Bull/images/blog-post/080618-the-importance-of-sleep-for-college-students/the-importance-of-sleep-for-college-students-index.jpg",
-    location: "Dublin, Ireland",
-    user: "Alice Johnson",
-    friend: true,
-    course: "CS",
-    date: "2023-02-25",
-  },
-  {
-    id: 2,
-    title: "Project Complete!",
-    content: "Just finished my project! 💻",
-    image_url:
-      "https://www.universityofcalifornia.edu/sites/default/files/styles/article_default_banner/public/college_voting_faq_header.jpg?h=7eca08bd&itok=3bUKecU1",
-    location: "San Francisco, USA",
-    user: "Mark Lee",
-    friend: false,
-    course: "Business",
-    date: "2023-01-15",
-  },
-  {
-    id: 3,
-    title: "Sunset Bliss",
-    content: "Beautiful sunset today! 🌅",
-    image_url:
-      "https://due.uci.edu/files/2017/08/uci_beach_august_nl.png",
-    location: "Paris, France",
-    user: "Sophia Wang",
-    friend: true,
-    course: "CS",
-    date: "2023-03-05",
-  },
-  {
-    id: 4,
-    title: "Game Night!",
-    content: "Anyone up for a game night? 🎲",
-    image_url:
-      "https://www.usnews.com/object/image/00000190-3ba9-d6ee-a7ff-7fbb4cfe0000/gettyimages-1473712269.jpg?update-time=1718987895511&size=responsive640",
-    location: "New York, USA",
-    user: "John Doe",
-    friend: false,
-    course: "Engineering",
-    date: "2023-03-12",
-  },
+// For now, we continue to use MOCK_USERS for user search
+const MOCK_USERS = [
+  { id: 101, username: "Alice Johnson", email: "alice@example.com", course: "CS" },
+  { id: 102, username: "Mark Lee", email: "mark@example.com", course: "Business" },
+  { id: 103, username: "Sophia Wang", email: "sophia@example.com", course: "CS" },
+  { id: 104, username: "John Doe", email: "john@example.com", course: "Engineering" },
 ];
 
 function SearchPage({ onlyFriends, nearMe, inMyCourse, recent }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") || "");
-
-  // Decide whether searching "users" or "posts"
-  const [searchType, setSearchType] = useState("users");
-  // The final list of results
+  const [searchType, setSearchType] = useState("users"); // "users" or "posts"
   const [results, setResults] = useState([]);
 
-  const [firestoreUsers, setFirestoreUsers] = useState([]);
+  // For posts: state to hold posts fetched from backend
+  const [postsData, setPostsData] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [errorPosts, setErrorPosts] = useState(null);
 
   const navigate = useNavigate();
 
+  // ----- Fetch posts from backend when "posts" is selected -----
   useEffect(() => {
-    const fetchUsersFromFirestore = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, "users"));
-        const userArray = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setFirestoreUsers(userArray);
-      } catch (error) {
-        console.error("Error fetching users from Firestore:", error);
-      }
-    };
+    if (searchType === "posts") {
+      const fetchPosts = async () => {
+        try {
+          setLoadingPosts(true);
+          const response = await fetch("http://localhost:8000/api/posts/");
+          if (!response.ok) {
+            throw new Error("Failed to fetch posts");
+          }
+          const data = await response.json();
+          // Transform the data to match what PostCard expects
+          const formattedPosts = data.posts.map((post) => ({
+            id: post.id,
+            title: post.title || "Untitled Post",
+            content: post.content,
+            image_url: post.image_url,
+            user: post.user,
+            // If latitude and longitude exist, combine them into a location string; otherwise, use post.location
+            location:
+              post.latitude && post.longitude
+                ? `${post.latitude}, ${post.longitude}`
+                : post.location || null,
+            created_at: post.created_at,
+            // Include filter-related fields if your backend provides them:
+            friend: post.friend, // true/false
+            course: post.course, // e.g. "CS"
+            date: post.created_at, // using created_at as the date for filtering
+          }));
+          setPostsData(formattedPosts);
+          setErrorPosts(null);
+        } catch (err) {
+          console.error("Error fetching posts:", err);
+          setErrorPosts(err.message);
+        } finally {
+          setLoadingPosts(false);
+        }
+      };
 
-    fetchUsersFromFirestore();
-  }, []);
+      fetchPosts();
+    }
+  }, [searchType]);
 
-
+  // ----- Filter Logic: Apply search query (and filters) to users or posts -----
   useEffect(() => {
-    // If empty query, no results
     if (!query.trim()) {
       setResults([]);
       return;
     }
-
-    let data;
     if (searchType === "users") {
-      // Filter from user array
-      data = firestoreUsers.filter((u) => {
-        // Combine relevant fields for searching
-        const combined = (u.firstName + u.lastName + u.email + (u.course || "")).toLowerCase();
+      // Filter MOCK_USERS by name, email, course, etc.
+      const filteredUsers = MOCK_USERS.filter((u) => {
+        const combined = (u.username + u.email + (u.course || "")).toLowerCase();
         return combined.includes(query.toLowerCase());
       });
+      setResults(filteredUsers);
     } else {
-      // Filter the local posts array
-      data = allPosts.filter((p) => {
-        const combined = (p.title + p.content + p.user + p.location).toLowerCase();
+      // Filter the postsData fetched from backend
+      let filteredPosts = postsData.filter((p) => {
+        const combined = (p.title + p.content + p.user + (p.location || "")).toLowerCase();
         return combined.includes(query.toLowerCase());
       });
-
-      // Optionally apply filters like onlyFriends, nearMe, etc.
+      // Apply additional filter checkboxes if enabled
       if (onlyFriends) {
-        data = data.filter((item) => item.friend);
+        filteredPosts = filteredPosts.filter((p) => p.friend);
       }
       if (nearMe) {
-        data = data.filter((item) => item.location === "Dublin, Ireland");
+        // Example: "Dublin, Ireland" is considered near
+        filteredPosts = filteredPosts.filter((p) => p.location === "Dublin, Ireland");
       }
       if (inMyCourse) {
-        data = data.filter((item) => item.course === "CS");
+        filteredPosts = filteredPosts.filter((p) => p.course === "CS");
       }
       if (recent) {
-        data = data.filter((item) => item.date > "2023-02-01");
+        // For demonstration, assume "recent" means after 2023-02-01
+        filteredPosts = filteredPosts.filter((p) => p.date > "2023-02-01");
       }
+      setResults(filteredPosts);
     }
+  }, [query, searchType, postsData, onlyFriends, nearMe, inMyCourse, recent]);
 
-    setResults(data);
-  }, [query, searchType, firestoreUsers, onlyFriends, nearMe, inMyCourse, recent]);
-
-  //////////////////////////////
-  // 3) Handling search + click
-  //////////////////////////////
+  // ----- Handlers -----
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setSearchParams({ q: query });
@@ -175,19 +113,18 @@ function SearchPage({ onlyFriends, nearMe, inMyCourse, recent }) {
 
   const handleResultClick = (item) => {
     if (searchType === "users") {
-      // Navigate to e.g. /profile/:id
-      navigate(`/profile/${item.id}`);
+      navigate(`/profile/${item.id}`, { state: { query, searchType } });
     } else {
-      navigate(`/post/${item.id}`);
+      navigate(`/post/${item.id}`, { state: { query, searchType } });
     }
   };
 
   return (
     <div className="container mx-auto p-4">
-      {/* (A) Search Input */}
+      {/* Search Input */}
       <form onSubmit={handleSearchSubmit} className="flex justify-center mb-4">
         <div className="relative w-full max-w-2xl">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
             type="text"
             placeholder="Search..."
@@ -198,7 +135,7 @@ function SearchPage({ onlyFriends, nearMe, inMyCourse, recent }) {
         </div>
       </form>
 
-      {/* (B) Toggle */}
+      {/* Toggle Buttons for Users vs Posts */}
       <div className="flex justify-center space-x-2 mb-4">
         <button
           onClick={() => setSearchType("users")}
@@ -218,7 +155,15 @@ function SearchPage({ onlyFriends, nearMe, inMyCourse, recent }) {
         </button>
       </div>
 
-      {/* (C) Results */}
+      {/* If Posts: show loading or error messages */}
+      {searchType === "posts" && loadingPosts && (
+        <div className="text-center text-xl mt-8">Loading posts...</div>
+      )}
+      {searchType === "posts" && errorPosts && (
+        <div className="text-center text-red-500 text-xl mt-8">{errorPosts}</div>
+      )}
+
+      {/* Display Results */}
       <div className="max-w-2xl mx-auto space-y-4">
         {results.length === 0 && query.trim() !== "" ? (
           <p className="text-center text-gray-500">No results found.</p>
@@ -230,17 +175,17 @@ function SearchPage({ onlyFriends, nearMe, inMyCourse, recent }) {
                 onClick={() => handleResultClick(item)}
                 className="p-4 bg-white shadow rounded cursor-pointer hover:bg-gray-50 transition"
               >
-                <p className="font-bold">{item.firstName} {item.lastName}</p>
+                <p className="font-bold">{item.username}</p>
                 <p className="text-sm text-gray-600">Email: {item.email}</p>
                 <p className="text-sm text-gray-600">Course: {item.course}</p>
               </div>
             ) : (
+              // For posts, we display the post card and allow click to view details
               <div
                 key={item.id}
                 onClick={() => handleResultClick(item)}
-                className="p-4 bg-white shadow rounded cursor-pointer hover:bg-gray-50 transition"
+                className="cursor-pointer"
               >
-                {/* optional: post image */}
                 <PostCard post={item} />
               </div>
             )
@@ -251,4 +196,4 @@ function SearchPage({ onlyFriends, nearMe, inMyCourse, recent }) {
   );
 }
 
-export default SearchPage;
+export default SearchPage
