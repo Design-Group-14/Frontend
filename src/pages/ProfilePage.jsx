@@ -6,6 +6,7 @@ import { PlusCircle, Trash2 } from "lucide-react";
 const ProfilePage = () => {
   const [user, setUser] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
+  const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,12 +14,28 @@ const ProfilePage = () => {
     const currentUser = auth.currentUser;
 
     if (currentUser) {
-      setUser({
-        name: `${localStorage.getItem("firstName") || "User"} ${localStorage.getItem("lastName") || ""}`,
+      const fullUser = {
         email: currentUser.email,
+        firstName: localStorage.getItem("firstName") || "User",
+        lastName: localStorage.getItem("lastName") || "",
         course: localStorage.getItem("course") || "Not Provided",
         avatar: currentUser.photoURL || null,
-      });
+      };
+      setUser(fullUser);
+
+      // Fetch posts by email
+      fetch(`http://localhost:8000/api/user/${currentUser.email}/`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.posts) {
+            setPosts(data.posts);
+          } else {
+            setPosts([]);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to load user posts", err);
+        });
     }
   }, []);
 
@@ -49,9 +66,7 @@ const ProfilePage = () => {
     if (window.confirm("Are you sure you want to delete your account? This cannot be undone.")) {
       try {
         await deleteUser(currentUser);
-        localStorage.removeItem("user");
-        localStorage.removeItem("course");
-        localStorage.setItem("isAuthenticated", "false");
+        localStorage.clear();
         navigate("/register");
       } catch (error) {
         alert("Error deleting account. Please log in again and try.");
@@ -86,7 +101,7 @@ const ProfilePage = () => {
           </label>
         </div>
 
-        {/* Delete Account Button - Moved to Right */}
+        {/* Delete Account Button */}
         <button onClick={handleDeleteAccount} className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 flex items-center absolute right-6">
           <Trash2 className="w-5 h-5 mr-1" />
           Delete Profile
@@ -98,6 +113,27 @@ const ProfilePage = () => {
         <h3 className="text-lg font-semibold text-gray-700">User Details</h3>
         <p className="text-gray-700"><strong>Email:</strong> {user.email}</p>
         <p className="text-gray-700"><strong>Course:</strong> {user.course}</p>
+      </div>
+
+      {/* Posts by User */}
+      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-3xl mt-6">
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Posts by You</h3>
+        {posts.length === 0 ? (
+          <p className="text-gray-500 italic">You haven't posted anything yet.</p>
+        ) : (
+          <div className="space-y-4">
+            {posts.map((post) => (
+              <div key={post.id} className="p-4 border rounded-md">
+                {post.image_url && (
+                  <img src={post.image_url} alt={post.title} className="w-full h-40 object-cover mb-2 rounded-md" />
+                )}
+                <h4 className="font-bold">{post.title}</h4>
+                <p>{post.content}</p>
+                <p className="text-xs text-gray-500 mt-1">{new Date(post.created_at).toLocaleString()}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
