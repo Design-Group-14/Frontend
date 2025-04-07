@@ -96,7 +96,13 @@ function AppContent({ isAuthenticated, setIsAuthenticated }) {
             path="/search"
              // Pass the filter states so you can use them in SearchPage
             element={isAuthenticated ? (<SearchPage onlyFriends={onlyFriends} nearMe={nearMe} inMyCourse={inMyCourse} recent={recent}/>) : (<Navigate to="/" />)}/>
-        </Routes>
+        
+          <Route
+            path="/profile/:email"
+            element={isAuthenticated ? <ProfilePage /> : <Navigate to="/" />}
+          />
+          </Routes>
+
       </div>
 
       {showFullLayout && (

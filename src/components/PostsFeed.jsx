@@ -62,9 +62,24 @@ const PostsFeed = ({ type = "friends" }) => {
   return (
     <div className="w-full max-w-2xl mx-auto p-4 space-y-4">
       {displayPosts.map((post) => (
-        <Link key={post.id} to={`/post/${post.id}`} className="block hover:opacity-80 transition">
+        <div key={post.id} className="bg-white rounded-lg shadow p-4">
+        <div className="flex justify-between items-center mb-2">
+          <Link
+            to={`/profile?email=${encodeURIComponent(post.user)}`}
+            className="text-blue-500 font-medium hover:underline"
+          >
+            {post.user}
+          </Link>
+          <span className="text-sm text-gray-500">
+            {new Date(post.created_at).toLocaleString()}
+          </span>
+        </div>
+      
+        <Link to={`/post/${post.id}`} className="block hover:opacity-80 transition">
           <PostCard post={post} />
         </Link>
+      </div>
+      
       ))}
     </div>
   );
