@@ -110,6 +110,7 @@ const ProfilePage = () => {
     if (!isOwner) return;
     const auth = getAuth();
     const currentUser = auth.currentUser;
+
     if (window.confirm("Are you sure you want to delete your account? This cannot be undone.")) {
       try {
         await deleteUser(currentUser);
