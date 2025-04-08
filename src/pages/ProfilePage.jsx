@@ -25,7 +25,7 @@ const ProfilePage = () => {
         setLoading(false);
         return;
       }
-      const name = ${localStorage.getItem("firstName") || "User"} ${localStorage.getItem("lastName") || ""};
+      const name = `${localStorage.getItem("firstName") || "User"} ${localStorage.getItem("lastName") || ""}`;
       const email = currentUser.email;
       const course = localStorage.getItem("course") || "Not Provided";
       const avatar = currentUser.photoURL || null;
@@ -38,7 +38,7 @@ const ProfilePage = () => {
         avatar,
       });
 
-      fetch(http://localhost:8000/api/user/${email}/)
+      fetch(`http://localhost:8000/api/user/${email}/`)
         .then((res) => res.json())
         .then((data) => setPosts(data.posts || []))
         .catch((err) => console.error("Failed to load posts", err));
@@ -50,12 +50,12 @@ const ProfilePage = () => {
       const fetchOtherUser = async () => {
         try {
           setLoading(true);
-          const response = await fetch(http://localhost:8000/auth/users/${id}/);
+          const response = await fetch(`http://localhost:8000/auth/users/${id}/`);
           if (!response.ok) {
             throw new Error("Failed to fetch user profile");
           }
           const data = await response.json();
-          const name = data.username || ${data.first_name} ${data.last_name};
+          const name = data.username || `${data.first_name} ${data.last_name}`;
           const userProfile = {
             id: data.id,
             name,
@@ -65,7 +65,7 @@ const ProfilePage = () => {
           };
           setUser(userProfile);
 
-          fetch(http://localhost:8000/api/user/${data.email}/)
+          fetch(`http://localhost:8000/api/user/${data.email}/`)
             .then((res) => res.json())
             .then((data) => setPosts(data.posts || []))
             .catch((err) => console.error("Failed to load posts", err));
@@ -110,9 +110,7 @@ const ProfilePage = () => {
     if (!isOwner) return;
     const auth = getAuth();
     const currentUser = auth.currentUser;
-    if (
-      window.confirm("Are you sure you want to delete your account? This cannot be undone.")
-    ) {
+    if (window.confirm("Are you sure you want to delete your account? This cannot be undone.")) {
       try {
         await deleteUser(currentUser);
         localStorage.removeItem("user");
@@ -187,7 +185,7 @@ const ProfilePage = () => {
 
       <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-3xl mt-6">
         <h3 className="text-lg font-semibold text-gray-700 mb-4">
-          {isOwner ? "Posts by You" : Posts by ${user.email}}
+          {isOwner ? "Posts by You" : `Posts by ${user.email}`}
         </h3>
         {posts.length === 0 ? (
           <p className="text-gray-500 italic">No posts found.</p>
