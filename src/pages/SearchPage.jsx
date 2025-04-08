@@ -3,107 +3,199 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import PostCard from "../components/PostsCard";
 
-// For now, we continue to use MOCK_USERS for user search
-const MOCK_USERS = [
-  { id: 101, username: "Alice Johnson", email: "alice@example.com", course: "CS" },
-  { id: 102, username: "Mark Lee", email: "mark@example.com", course: "Business" },
-  { id: 103, username: "Sophia Wang", email: "sophia@example.com", course: "CS" },
-  { id: 104, username: "John Doe", email: "john@example.com", course: "Engineering" },
-];
-
-function SearchPage({ onlyFriends, nearMe, inMyCourse, recent }) {
+function SearchPage({
+  onlyFriends,
+  nearMe,
+  inMyCourse,
+  recent,
+  sameGraduationYear,
+  searchType,
+  setSearchType,
+}) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") || "");
-  const [searchType, setSearchType] = useState("users"); // "users" or "posts"
   const [results, setResults] = useState([]);
 
-  // For posts: state to hold posts fetched from backend
+  // ---------- USERS: state to hold real users from backend ----------
+  const [usersData, setUsersData] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [errorUsers, setErrorUsers] = useState(null);
+
+  // ---------- POSTS: state to hold posts fetched from backend ----------
   const [postsData, setPostsData] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [errorPosts, setErrorPosts] = useState(null);
 
   const navigate = useNavigate();
 
+  // Read current user's filtering info from localStorage:
+  const [myCourse, setMyCourse] = useState("");
+  const [myCountry, setMyCountry] = useState("");
+  const [myGraduationYear, setMyGraduationYear] = useState("");
+
+  useEffect(() => {
+    setMyCourse(localStorage.getItem("course") || "");
+    setMyCountry(localStorage.getItem("country") || "");
+    setMyGraduationYear(localStorage.getItem("graduationYear") || "");
+  }, []);
+
+  // ----- Fetch Users from backend when "users" is selected -----
+  useEffect(() => {
+    if (searchType !== "users") return;
+    const fetchUsers = async () => {
+      try {
+        setLoadingUsers(true);
+        // Build query params for backend filtering
+        const params = [];
+        if (query.trim()) {
+          params.push(`search=${encodeURIComponent(query)}`);
+        }
+        if (inMyCourse && myCourse) {
+          params.push(`course=${encodeURIComponent(myCourse)}`);
+        }
+        if (nearMe && myCountry) {
+          params.push(`country=${encodeURIComponent(myCountry)}`);
+        }
+        if (onlyFriends) {
+          params.push("only_friends=true");
+        }
+        let endpoint = "http://localhost:8000/auth/users/";
+        if (params.length > 0) {
+          endpoint += `?${params.join("&")}`;
+        }
+        console.log("Fetching users from:", endpoint);
+        const response = await fetch(endpoint);
+        if (!response.ok) {
+          throw new Error("Failed to fetch users");
+        }
+        const data = await response.json();
+        console.log("Fetched user data:", data);
+        // Expect data.users to be an array; transform if needed.
+        const formattedUsers = data.users.map((u) => ({
+          id: u.id,
+          username: u.username || `${u.first_name} ${u.last_name}`,
+          email: u.email,
+          course: u.course_name || "",
+          country: u.country || "",
+          graduationYear: u.graduation_year || "",
+        }));
+        setUsersData(formattedUsers);
+        setErrorUsers(null);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+        setErrorUsers(err.message);
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+    fetchUsers();
+  }, [searchType, query, onlyFriends, nearMe, inMyCourse, myCourse, myCountry]);
+
   // ----- Fetch posts from backend when "posts" is selected -----
   useEffect(() => {
-    if (searchType === "posts") {
-      const fetchPosts = async () => {
-        try {
-          setLoadingPosts(true);
-          const response = await fetch("http://localhost:8000/api/posts/");
-          if (!response.ok) {
-            throw new Error("Failed to fetch posts");
-          }
-          const data = await response.json();
-          // Transform the data to match what PostCard expects
-          const formattedPosts = data.posts.map((post) => ({
-            id: post.id,
-            title: post.title || "Untitled Post",
-            content: post.content,
-            image_url: post.image_url,
-            user: post.user,
-            // If latitude and longitude exist, combine them into a location string; otherwise, use post.location
-            location:
-              post.latitude && post.longitude
-                ? `${post.latitude}, ${post.longitude}`
-                : post.location || null,
-            created_at: post.created_at,
-            // Include filter-related fields if your backend provides them:
-            friend: post.friend, // true/false
-            course: post.course, // e.g. "CS"
-            date: post.created_at, // using created_at as the date for filtering
-          }));
-          setPostsData(formattedPosts);
-          setErrorPosts(null);
-        } catch (err) {
-          console.error("Error fetching posts:", err);
-          setErrorPosts(err.message);
-        } finally {
-          setLoadingPosts(false);
+    if (searchType !== "posts") return;
+    const fetchPosts = async () => {
+      try {
+        setLoadingPosts(true);
+        const response = await fetch("http://localhost:8000/api/posts/");
+        if (!response.ok) {
+          throw new Error("Failed to fetch posts");
         }
-      };
-
-      fetchPosts();
-    }
+        const data = await response.json();
+        const formattedPosts = data.posts.map((post) => ({
+          id: post.id,
+          title: post.title || "Untitled Post",
+          content: post.content,
+          image_url: post.image_url,
+          user: post.user,
+          location:
+            post.latitude && post.longitude
+              ? `${post.latitude}, ${post.longitude}`
+              : post.location || null,
+          created_at: post.created_at,
+          friend: post.friend || false,
+          course: post.course || "",
+          date: post.created_at,
+        }));
+        setPostsData(formattedPosts);
+        setErrorPosts(null);
+      } catch (err) {
+        console.error("Error fetching posts:", err);
+        setErrorPosts(err.message);
+      } finally {
+        setLoadingPosts(false);
+      }
+    };
+    fetchPosts();
   }, [searchType]);
 
-  // ----- Filter Logic: Apply search query (and filters) to users or posts -----
+  // ----- Filter Logic / Setting results -----
   useEffect(() => {
+    console.log("SearchPage filtering effect triggered", {
+      query,
+      searchType,
+      myGraduationYear,
+      sameGraduationYear,
+      usersData,
+    });
     if (!query.trim()) {
       setResults([]);
       return;
     }
     if (searchType === "users") {
-      // Filter MOCK_USERS by name, email, course, etc.
-      const filteredUsers = MOCK_USERS.filter((u) => {
-        const combined = (u.username + u.email + (u.course || "")).toLowerCase();
+      let filteredUsers = usersData;
+      // Apply "Same Graduation Year" filter if enabled
+      if (sameGraduationYear && myGraduationYear) {
+        filteredUsers = filteredUsers.filter(
+          (u) => u.graduationYear === myGraduationYear
+        );
+        console.log("My Graduation Year:", myGraduationYear);
+        console.log("User Graduation Year:", u.graduationYear);
+      }
+      // Also perform local text filtering
+      filteredUsers = filteredUsers.filter((u) => {
+        const combined = (u.username + u.email + u.course).toLowerCase();
         return combined.includes(query.toLowerCase());
       });
       setResults(filteredUsers);
     } else {
-      // Filter the postsData fetched from backend
       let filteredPosts = postsData.filter((p) => {
         const combined = (p.title + p.content + p.user + (p.location || "")).toLowerCase();
         return combined.includes(query.toLowerCase());
       });
-      // Apply additional filter checkboxes if enabled
       if (onlyFriends) {
         filteredPosts = filteredPosts.filter((p) => p.friend);
       }
       if (nearMe) {
-        // Example: "Dublin, Ireland" is considered near
-        filteredPosts = filteredPosts.filter((p) => p.location === "Dublin, Ireland");
+        filteredPosts = filteredPosts.filter((p) => p.location === myCountry);
       }
       if (inMyCourse) {
-        filteredPosts = filteredPosts.filter((p) => p.course === "CS");
+        filteredPosts = filteredPosts.filter((p) => p.course === myCourse);
       }
       if (recent) {
-        // For demonstration, assume "recent" means after 2023-02-01
-        filteredPosts = filteredPosts.filter((p) => p.date > "2023-02-01");
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        filteredPosts = filteredPosts.filter((p) => {
+          if (!p.created_at) return false;
+          return new Date(p.created_at) > oneWeekAgo;
+        });
       }
       setResults(filteredPosts);
     }
-  }, [query, searchType, postsData, onlyFriends, nearMe, inMyCourse, recent]);
+  }, [
+    query,
+    searchType,
+    usersData,
+    postsData,
+    onlyFriends,
+    nearMe,
+    inMyCourse,
+    recent,
+    myCourse,
+    myCountry,
+    myGraduationYear,
+    sameGraduationYear,
+  ]);
 
   // ----- Handlers -----
   const handleSearchSubmit = (e) => {
@@ -121,7 +213,7 @@ function SearchPage({ onlyFriends, nearMe, inMyCourse, recent }) {
 
   return (
     <div className="container mx-auto p-4">
-      {/* Search Input */}
+      {/* Search Form */}
       <form onSubmit={handleSearchSubmit} className="flex justify-center mb-4">
         <div className="relative w-full max-w-2xl">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -135,7 +227,7 @@ function SearchPage({ onlyFriends, nearMe, inMyCourse, recent }) {
         </div>
       </form>
 
-      {/* Toggle Buttons for Users vs Posts */}
+      {/* Toggle Buttons */}
       <div className="flex justify-center space-x-2 mb-4">
         <button
           onClick={() => setSearchType("users")}
@@ -155,7 +247,13 @@ function SearchPage({ onlyFriends, nearMe, inMyCourse, recent }) {
         </button>
       </div>
 
-      {/* If Posts: show loading or error messages */}
+      {/* Loading / Error indicators */}
+      {searchType === "users" && loadingUsers && (
+        <div className="text-center text-xl mt-8">Loading users...</div>
+      )}
+      {searchType === "users" && errorUsers && (
+        <div className="text-center text-red-500 text-xl mt-8">{errorUsers}</div>
+      )}
       {searchType === "posts" && loadingPosts && (
         <div className="text-center text-xl mt-8">Loading posts...</div>
       )}
@@ -164,7 +262,7 @@ function SearchPage({ onlyFriends, nearMe, inMyCourse, recent }) {
       )}
 
       {/* Display Results */}
-      <div className="max-w-2xl mx-auto space-y-4">
+      <div className="max-w-2xl mx-auto space-y-4 mt-4">
         {results.length === 0 && query.trim() !== "" ? (
           <p className="text-center text-gray-500">No results found.</p>
         ) : (
@@ -178,9 +276,11 @@ function SearchPage({ onlyFriends, nearMe, inMyCourse, recent }) {
                 <p className="font-bold">{item.username}</p>
                 <p className="text-sm text-gray-600">Email: {item.email}</p>
                 <p className="text-sm text-gray-600">Course: {item.course}</p>
+                <p className="text-sm text-gray-600">
+                  Graduation Year: {item.graduationYear}
+                </p>
               </div>
             ) : (
-              // For posts, we display the post card and allow click to view details
               <div
                 key={item.id}
                 onClick={() => handleResultClick(item)}
@@ -196,4 +296,4 @@ function SearchPage({ onlyFriends, nearMe, inMyCourse, recent }) {
   );
 }
 
-export default SearchPage
+export default SearchPage;

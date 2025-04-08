@@ -23,6 +23,33 @@ const RegisterPage = ({ setIsAuthenticated }) => {
         displayName: `${firstName} ${lastName}`,
       });
 
+      // ✅ Store user in Django backend
+      try {
+        const response = await fetch('http://localhost:8000/auth/register/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            username: email, // Using email as username
+            first_name: firstName,
+            last_name: lastName,
+            course_name: course,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to store user in backend');
+        }
+      } catch (error) {
+        console.error('Backend registration error:', error);
+        // Optionally delete the Firebase user if backend registration fails
+        await deleteUser(user);
+        throw error;
+      }
+
       // ✅ Store user details in localStorage
       const userData = { email, firstName, lastName, course };
       localStorage.setItem("user", JSON.stringify(userData));
