@@ -1,4 +1,3 @@
-// PostsFeed.jsx
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import PostCard from "./PostsCard";
@@ -25,10 +24,11 @@ const PostsFeed = () => {
           content: post.content,
           image_url: post.image_url,
           user: post.user,
+          location: post.latitude && post.longitude ? `${post.latitude}, ${post.longitude}` : null,
           created_at: post.created_at
         }));
         
-        setPosts(formattedPosts.slice(0, 2)); // Only show 2 friends' posts
+        setPosts(formattedPosts);
       } catch (err) {
         setError('Failed to load posts. Please try again later.');
       } finally {
@@ -38,6 +38,9 @@ const PostsFeed = () => {
 
     fetchPosts();
   }, []);
+
+  // Filter to show only 2 posts for friends tab
+  const displayPosts = activeTab === "friends" ? posts.slice(0, 2) : posts;
 
   return (
     <div className="w-full flex flex-col items-center">
@@ -67,32 +70,41 @@ const PostsFeed = () => {
 
       {/* Centered Content area */}
       <div className="w-full max-w-lg flex flex-col items-center">
-        {activeTab === "friends" ? (
+        {activeTab === "nearby" ? (
+          <div className="w-full h-[500px] p-4">
+            <MapView />
+          </div>
+        ) : (
           <>
             {loading ? (
               <div className="w-full text-center py-8">Loading posts...</div>
             ) : error ? (
               <div className="w-full text-center py-8 text-red-500">{error}</div>
-            ) : posts.length === 0 ? (
-              <div className="w-full text-center py-8">No posts from friends yet</div>
+            ) : displayPosts.length === 0 ? (
+              <div className="w-full text-center py-8">No posts found</div>
             ) : (
               <div className="w-full p-4 space-y-4">
-                {posts.map((post) => (
-                  <Link 
-                    key={post.id} 
-                    to={`/post/${post.id}`} 
-                    className="block hover:opacity-80 transition"
-                  >
-                    <PostCard post={post} />
-                  </Link>
+                {displayPosts.map((post) => (
+                  <div key={post.id} className="bg-white rounded-lg shadow p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <Link
+                        to={`/profile?email=${encodeURIComponent(post.user)}`}
+                        className="text-blue-500 font-medium hover:underline"
+                      >
+                        {post.user}
+                      </Link>
+                      <span className="text-sm text-gray-500">
+                        {new Date(post.created_at).toLocaleString()}
+                      </span>
+                    </div>
+                    <Link to={`/post/${post.id}`} className="block hover:opacity-80 transition">
+                      <PostCard post={post} />
+                    </Link>
+                  </div>
                 ))}
               </div>
             )}
           </>
-        ) : (
-          <div className="w-full h-[500px] p-4"> {/* Fixed height for map */}
-            <MapView />
-          </div>
         )}
       </div>
     </div>
