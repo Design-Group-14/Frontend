@@ -14,20 +14,23 @@ const PostsFeed = () => {
       try {
         setLoading(true);
         const response = await fetch('http://localhost:8000/api/posts/');
-        
-        if (!response.ok) throw new Error('Failed to fetch posts');
-        
         const data = await response.json();
+  
         const formattedPosts = data.posts.map(post => ({
           id: post.id,
           title: post.title || 'Untitled Post',
           content: post.content,
           image_url: post.image_url,
           user: post.user,
-          location: post.latitude && post.longitude ? `${post.latitude}, ${post.longitude}` : null,
+          latitude: post.latitude,
+          longitude: post.longitude,
           created_at: post.created_at
         }));
-        
+  
+        console.log("Post IDs & Locations:", formattedPosts.map(p => ({
+          id: p.id, lat: p.latitude, lng: p.longitude
+        })));
+  
         setPosts(formattedPosts);
       } catch (err) {
         setError('Failed to load posts. Please try again later.');
@@ -35,9 +38,10 @@ const PostsFeed = () => {
         setLoading(false);
       }
     };
-
+  
     fetchPosts();
   }, []);
+  
 
   // Filter to show only 2 posts for friends tab
   const displayPosts = activeTab === "friends" ? posts.slice(0, 2) : posts;
@@ -72,7 +76,7 @@ const PostsFeed = () => {
       <div className="w-full max-w-lg flex flex-col items-center">
         {activeTab === "nearby" ? (
           <div className="w-full h-[500px] p-4">
-            <MapView />
+            <MapView posts ={posts}/>
           </div>
         ) : (
           <>

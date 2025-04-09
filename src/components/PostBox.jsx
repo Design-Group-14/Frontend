@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { uploadImageToFirebase } from "../utils/uploadImage";
-import { PlusCircle } from "lucide-react"; // ✅ icon
+import { PlusCircle } from "lucide-react";
 
 const PostBox = () => {
   const [post, setPost] = useState("");
@@ -19,25 +19,33 @@ const PostBox = () => {
   const handlePost = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-
       if (!user || !user.email) {
         throw new Error("User is not authenticated or missing email.");
       }
 
       let imageUrl = null;
-
       if (imageFile) {
-        try {
-          setUploading(true);
-          imageUrl = await uploadImageToFirebase(imageFile, setUploadProgress);
-          console.log("Image uploaded to:", imageUrl);
-        } catch (uploadError) {
-          console.error("Image upload failed:", uploadError);
-          setError("Image upload failed. Please try again.");
-          setUploading(false);
-          return;
-        }
+        setUploading(true);
+        imageUrl = await uploadImageToFirebase(imageFile, setUploadProgress);
         setUploading(false);
+      }
+
+      // Get fresh geolocation (not cached)
+      let latitude = null;
+      let longitude = null;
+      try {
+        const position = await new Promise((resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+          })
+        );
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
+        console.log("📍 Fresh coordinates:", latitude, longitude);
+      } catch (geoError) {
+        console.warn("Geolocation failed or denied by user:", geoError);
       }
 
       const response = await fetch("http://localhost:8000/api/posts/create/", {
@@ -50,6 +58,8 @@ const PostBox = () => {
           content: post,
           email: user.email,
           image_url: imageUrl,
+          latitude,
+          longitude,
         }),
       });
 
@@ -58,14 +68,13 @@ const PostBox = () => {
         throw new Error(errorData.error || "Failed to create post");
       }
 
-      const data = await response.json();
-      console.log("Post created successfully:", data);
-
+      console.log("✅ Post created successfully");
       setPost("");
       setTitle("");
       setImageFile(null);
       setUploadProgress(0);
       setError("");
+
     } catch (error) {
       console.error("Error creating post:", error);
       setError(error.message || "Failed to create post");
@@ -88,7 +97,6 @@ const PostBox = () => {
         onChange={(e) => setTitle(e.target.value)}
       />
 
-      {/* ✅ Textarea with Icon Upload Button */}
       <div className="relative mb-3">
         <textarea
           className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -114,7 +122,6 @@ const PostBox = () => {
         />
       </div>
 
-      {/* ✅ Image Preview */}
       {imageFile && (
         <div className="mb-3">
           <p className="text-sm text-gray-600">Image Preview:</p>
@@ -126,7 +133,6 @@ const PostBox = () => {
         </div>
       )}
 
-      {/* ✅ Progress Bar */}
       {uploading && uploadProgress > 0 && (
         <div className="w-full bg-gray-200 rounded-full h-2.5 mb-3">
           <div
