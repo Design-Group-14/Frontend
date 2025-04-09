@@ -24,6 +24,7 @@ const PostsFeed = () => {
           user: post.user,
           latitude: post.latitude,
           longitude: post.longitude,
+          location: post.location,
           created_at: post.created_at
         }));
   
@@ -44,7 +45,7 @@ const PostsFeed = () => {
   
 
   // Filter to show only 2 posts for friends tab
-  const displayPosts = activeTab === "friends" ? posts.slice(0, 2) : posts;
+  const displayPosts = activeTab === "friends" ? posts.slice(0, 20) : posts;
 
   return (
     <div className="w-full flex flex-col items-center">

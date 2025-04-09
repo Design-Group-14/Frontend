@@ -5,6 +5,7 @@ import { PlusCircle } from "lucide-react";
 const PostBox = () => {
   const [post, setPost] = useState("");
   const [title, setTitle] = useState("");
+  const [location, setLocation] = useState(""); // 🆕
   const [imageFile, setImageFile] = useState(null);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -22,15 +23,14 @@ const PostBox = () => {
       if (!user || !user.email) {
         throw new Error("User is not authenticated or missing email.");
       }
-
+  
       let imageUrl = null;
       if (imageFile) {
         setUploading(true);
         imageUrl = await uploadImageToFirebase(imageFile, setUploadProgress);
         setUploading(false);
       }
-
-      // Get fresh geolocation (not cached)
+  
       let latitude = null;
       let longitude = null;
       try {
@@ -38,7 +38,7 @@ const PostBox = () => {
           navigator.geolocation.getCurrentPosition(resolve, reject, {
             enableHighAccuracy: true,
             timeout: 10000,
-            maximumAge: 0
+            maximumAge: 0,
           })
         );
         latitude = position.coords.latitude;
@@ -47,7 +47,10 @@ const PostBox = () => {
       } catch (geoError) {
         console.warn("Geolocation failed or denied by user:", geoError);
       }
-
+  
+      // ✅ Log the user-entered location
+      console.log("📍 User location field:", location);
+  
       const response = await fetch("http://localhost:8000/api/posts/create/", {
         method: "POST",
         headers: {
@@ -60,21 +63,22 @@ const PostBox = () => {
           image_url: imageUrl,
           latitude,
           longitude,
+          location, // ✅ include user-written location
         }),
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to create post");
       }
-
+  
       console.log("✅ Post created successfully");
       setPost("");
       setTitle("");
+      setLocation(""); // reset
       setImageFile(null);
       setUploadProgress(0);
       setError("");
-
     } catch (error) {
       console.error("Error creating post:", error);
       setError(error.message || "Failed to create post");
@@ -82,12 +86,23 @@ const PostBox = () => {
       setUploadProgress(0);
     }
   };
+  
+  
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
       <h2 className="text-lg font-semibold text-gray-700 mb-2">What's happening?</h2>
 
       {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
+
+      {/* 🆕 Location Input */}
+      <input
+        type="text"
+        className="w-full p-3 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Where are you posting from? (e.g. Trinity Library)"
+        value={location}
+        onChange={(e) => setLocation(e.target.value)}
+      />
 
       <input
         type="text"
@@ -104,7 +119,6 @@ const PostBox = () => {
           value={post}
           onChange={(e) => setPost(e.target.value)}
         />
-
         <button
           type="button"
           onClick={handleIconClick}
@@ -112,7 +126,6 @@ const PostBox = () => {
         >
           <PlusCircle size={28} />
         </button>
-
         <input
           type="file"
           accept="image/*"
@@ -142,9 +155,7 @@ const PostBox = () => {
         </div>
       )}
 
-      {uploading && (
-        <div className="text-sm text-gray-500 mb-2">Uploading image...</div>
-      )}
+      {uploading && <div className="text-sm text-gray-500 mb-2">Uploading image...</div>}
 
       <button
         onClick={handlePost}
