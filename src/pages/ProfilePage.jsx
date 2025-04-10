@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getAuth, updateProfile, deleteUser } from "firebase/auth";
 import { useNavigate, useParams } from "react-router-dom";
 import { PlusCircle, Trash2 } from "lucide-react";
+import MessageUserButton from "../components/MessageUserButton";
 
 const ProfilePage = () => {
   const { id } = useParams();
@@ -122,7 +123,8 @@ const ProfilePage = () => {
         await deleteUser(currentUser);
         localStorage.clear();
         navigate("/register");
-      } catch (err) {
+      } catch (error) {
+        console.error("Error deleting account:", error);
         alert("Error deleting account. Please log in again and try.");
       }
     }

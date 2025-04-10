@@ -8,7 +8,6 @@ import {
 } from "react-router-dom";
 import LeftNavbar from "./components/LeftNavbar";
 import SearchField from "./components/SearchFields";
-import TrendingTopics from "./components/TrendingTopics";
 import SuggestedUsers from "./components/SuggestedUser";
 import SearchBar from "./components/SearchBar";
 import HomePage from "./pages/HomePage";
@@ -19,10 +18,9 @@ import PostsFeed from "./components/PostsFeed";
 import PostPage from "./pages/PostPage";
 import ProfilePage from "./pages/ProfilePage";
 import MessagesPage from "./pages/MessagesPage";
-import NotificationsPage from "./pages/NotificationsPage";
 import ChatPage from "./pages/ChatPage";
 import SearchPage from "./pages/SearchPage";
-import SearchFiltersRightPanel from "./components/SearchFiltersRIghtPanel";
+import SearchFiltersRightPanel from "./components/SearchFiltersRightPanel";
 import FollowersPage from './pages/FollowersPage';
 
 import "./App.css";
@@ -55,7 +53,6 @@ function AppContent({ isAuthenticated, setIsAuthenticated }) {
       location.pathname === "/dashboard" ||
       location.pathname.startsWith("/profile") ||
       location.pathname.startsWith("/messages") ||
-      location.pathname.startsWith("/notifications") ||
       location.pathname === "/search");
 
   const isSearchPage = location.pathname === "/search";
@@ -68,10 +65,10 @@ function AppContent({ isAuthenticated, setIsAuthenticated }) {
   const [searchType, setSearchType] = useState("users");
 
   return (
-    <div className="flex min-h-screen">
-      {showFullLayout && <LeftNavbar />}
+    <div className="min-h-screen bg-gray-100">
+      {showFullLayout && <LeftNavbar setIsAuthenticated={setIsAuthenticated} />}
 
-      <div className="flex-grow px-20">
+      <div className={`${showFullLayout ? "ml-64 mr-80" : ""} p-4 transition-all duration-300`}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route
@@ -129,12 +126,6 @@ function AppContent({ isAuthenticated, setIsAuthenticated }) {
             path="/messages/:id"
             element={
               isAuthenticated ? <ChatPage /> : <Navigate to="/" />
-            }
-          />
-          <Route
-            path="/notifications"
-            element={
-              isAuthenticated ? <NotificationsPage /> : <Navigate to="/" />
             }
           />
           <Route

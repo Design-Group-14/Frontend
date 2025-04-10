@@ -1,31 +1,26 @@
-import { Home, Bell, Mail, User, PlusCircle, LogOut } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import Badge from '../assets/Badge.jpg';
+import { LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import SearchField from "./SearchFields";
-import TrendingTopics from "./TrendingTopics";
 import SuggestedUsers from "./SuggestedUser";
-import { Search } from "lucide-react";
-import React, { useState } from "react";
 
 const Navbar = ({ setIsAuthenticated }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    setIsAuthenticated(false); // ✅ Set authentication to false
-    localStorage.removeItem("isAuthenticated"); // ✅ Remove authentication from storage
-    navigate("/"); // ✅ Redirect to homepage
+    setIsAuthenticated(false);
+    localStorage.removeItem("isAuthenticated");
+    navigate("/");
   };
 
   return (
-    <nav className="fixed top-0 right-0 h-full w-64 bg-white shadow-lg p-6 flex flex-col justify-between">
+    <nav className="fixed top-0 right-0 h-full w-80 bg-white shadow-lg p-6 flex flex-col justify-between">
       {/* Search & Suggested Users */}
       <div>
         <SearchField />
-        <TrendingTopics />
         <SuggestedUsers />
       </div>
 
-      {/* ✅ Logout Button */}
+      {/* Logout Button */}
       <button
         onClick={handleLogout}
         className="flex items-center justify-center bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition duration-300 w-full"

@@ -1,40 +1,29 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const MessagesPage = () => {
   const [friends, setFriends] = useState([]);
 
   useEffect(() => {
-    // Simulated friend list with unread status
+    // Enhanced friends list with realistic conversations and user details
     setFriends([
       {
         id: 1,
-        name: "Alice Johnson",
-        username: "@alice",
-        avatar: "https://i.pravatar.cc/50?img=1",
-        lastMessage: { sender: "You", text: "Hey, how’s it going?" },
-        unread: true, // ✅ Initially unread
+        name: "Mark Healy",
+        username: "@mark_healy",
+        email: "mhealy6@tcd.ie",
+        avatar: "",
+        lastMessage: { sender: "Mark Healy", text: "How about tomorrow at the library around 3pm?" },
+        unread: true,
+        lastActive: "10 min ago",
+        major: "Computer Science",
+        year: "Junior"
       },
-      {
-        id: 2,
-        name: "Mark Lee",
-        username: "@marklee",
-        avatar: "https://i.pravatar.cc/50?img=2",
-        lastMessage: { sender: "Mark Lee", text: "Let's catch up later!" },
-        unread: false, // ✅ Already read
-      },
-      {
-        id: 3,
-        name: "John Smith",
-        username: "@johnsmith",
-        avatar: "https://i.pravatar.cc/50?img=3",
-        lastMessage: { sender: "You", text: "See you at the event!" },
-        unread: true, // ✅ Initially unread
-      },
+      
     ]);
   }, []);
 
-  // ✅ Function to mark a message as read when clicked
+  // Function to mark a message as read when clicked
   const markAsRead = (id) => {
     setFriends((prevFriends) =>
       prevFriends.map((friend) =>
@@ -57,25 +46,39 @@ const MessagesPage = () => {
                 <Link
                   to={`/messages/${friend.id}`}
                   className="flex items-center p-3 hover:bg-gray-100 transition"
-                  onClick={() => markAsRead(friend.id)} // ✅ Marks as read when clicked
+                  onClick={() => markAsRead(friend.id)}
                 >
-                  {/* Avatar */}
-                  <img
-                    src={friend.avatar}
-                    alt={friend.name}
-                    className="w-12 h-12 rounded-full mr-4"
-                  />
+                  {/* Avatar with online indicator */}
+                  <div className="relative mr-4">
+                    <img
+                      src={friend.avatar}
+                      alt={friend.name}
+                      className="w-12 h-12 rounded-full"
+                    />
+                    {friend.lastActive === "Online" && (
+                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
+                    )}
+                  </div>
 
-                  {/* Name & Last Message */}
+                  {/* Name, Major & Last Message */}
                   <div className="flex-grow">
-                    <h2 className={`font-semibold ${friend.unread ? "font-bold" : "font-normal"}`}>
-                      {friend.name}
-                    </h2>
+                    <div className="flex justify-between items-baseline">
+                      <h2 className={`font-semibold ${friend.unread ? "font-bold" : "font-normal"}`}>
+                        {friend.name}
+                      </h2>
+                      <span className="text-xs text-gray-500">{friend.lastActive}</span>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-1">{friend.major} • {friend.year}</p>
                     <p className={`text-gray-500 text-sm ${friend.unread ? "font-semibold" : "font-normal"}`}>
-                      <span className="font-medium">{friend.lastMessage.sender}: </span>
+                      <span className="font-medium">{friend.lastMessage.sender === "You" ? "You: " : ""}</span>
                       {friend.lastMessage.text}
                     </p>
                   </div>
+                  
+                  {/* Unread indicator */}
+                  {friend.unread && (
+                    <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+                  )}
                 </Link>
               </li>
             ))}
