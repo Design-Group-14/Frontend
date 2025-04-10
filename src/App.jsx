@@ -59,13 +59,12 @@ function AppContent({ isAuthenticated, setIsAuthenticated }) {
 
   const isSearchPage = location.pathname === "/search";
 
-  // Lift filter states and search mode so they are shared between SearchPage and the filters panel
   const [onlyFriends, setOnlyFriends] = useState(false);
   const [nearMe, setNearMe] = useState(false);
   const [inMyCourse, setInMyCourse] = useState(false);
   const [recent, setRecent] = useState(false);
   const [sameGraduationYear, setSameGraduationYear] = useState(false);
-  const [searchType, setSearchType] = useState("users"); // "users" or "posts"
+  const [searchType, setSearchType] = useState("users");
 
   return (
     <div className="flex min-h-screen">
@@ -76,13 +75,7 @@ function AppContent({ isAuthenticated, setIsAuthenticated }) {
           <Route path="/" element={<HomePage />} />
           <Route
             path="/login"
-            element={
-              isAuthenticated ? (
-                <Navigate to="/" />
-              ) : (
-                <LoginPage setIsAuthenticated={setIsAuthenticated} />
-              )
-            }
+            element={<LoginPage setIsAuthenticated={setIsAuthenticated} />}
           />
           <Route
             path="/register"
