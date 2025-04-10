@@ -41,3 +41,57 @@
     color: #888;
   }
   
+  /* Address Finder styles */
+  .idpc-input {
+    position: relative;
+  }
+  
+  .idpc__autocomplete {
+    position: absolute;
+    z-index: 10000;
+    min-width: 300px;
+    background-color: white;
+    border: 1px solid #dedede;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    margin-top: 4px;
+  }
+  
+  .idpc__option {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .idpc__option:hover, .idpc__option:focus, .idpc__option.selected {
+    background-color: #f0f7ff;
+  }
+  
+  .idpc__option:last-child {
+    border-bottom: none;
+  }
+  
+  .idpc__spinner {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  /* Custom progress bar overrides for address-finder */
+  .idpc-loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #3498db;
+    border-radius: 50%;
+    animation: idpc-spinner 0.8s linear infinite;
+  }
+  
+  @keyframes idpc-spinner {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  

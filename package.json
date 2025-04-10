@@ -4,10 +4,13 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@ideal-postcodes/address-finder": "^5.2.4",
+    "@ideal-postcodes/core-interface": "^3.2.1",
     "firebase": "^11.3.1",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "lucide-react": "^0.479.0",
+    "node-geocoder": "^4.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-leaflet": "^4.2.1",
