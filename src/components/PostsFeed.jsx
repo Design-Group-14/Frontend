@@ -13,43 +13,37 @@ const PostsFeed = () => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8000/api/posts/');
+        const response = await fetch("http://localhost:8000/api/posts/");
         const data = await response.json();
-  
-        const formattedPosts = data.posts.map(post => ({
+
+        const formattedPosts = data.posts.map((post) => ({
           id: post.id,
-          title: post.title || 'Untitled Post',
+          title: post.title || "Untitled Post",
           content: post.content,
           image_url: post.image_url,
           user: post.user,
           latitude: post.latitude,
           longitude: post.longitude,
           location: post.location,
-          created_at: post.created_at
+          created_at: post.created_at,
+          likes: post.likes || 0,
         }));
-  
-        console.log("Post IDs & Locations:", formattedPosts.map(p => ({
-          id: p.id, lat: p.latitude, lng: p.longitude
-        })));
-  
+
         setPosts(formattedPosts);
       } catch (err) {
-        setError('Failed to load posts. Please try again later.');
+        setError("Failed to load posts. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
-  
+
     fetchPosts();
   }, []);
-  
 
-  // Filter to show only 2 posts for friends tab
   const displayPosts = activeTab === "friends" ? posts.slice(0, 20) : posts;
 
   return (
     <div className="w-full flex flex-col items-center">
-      {/* Centered Tab buttons */}
       <div className="flex gap-4 p-4 bg-white border-b w-full max-w-lg justify-center">
         <button
           className={`px-6 py-2 rounded-lg shadow transition ${
@@ -73,11 +67,10 @@ const PostsFeed = () => {
         </button>
       </div>
 
-      {/* Centered Content area */}
       <div className="w-full max-w-lg flex flex-col items-center">
         {activeTab === "nearby" ? (
           <div className="w-full h-[500px] p-4">
-            <MapView posts ={posts}/>
+            <MapView posts={posts} />
           </div>
         ) : (
           <>
@@ -102,9 +95,21 @@ const PostsFeed = () => {
                         {new Date(post.created_at).toLocaleString()}
                       </span>
                     </div>
-                    <Link to={`/post/${post.id}`} className="block hover:opacity-80 transition">
-                      <PostCard post={post} />
+
+                    {/* Only wrap the image + title/content area in a link */}
+                    <Link
+                      to={`/post/${post.id}`}
+                      className="block hover:opacity-80 transition"
+                    >
+                      <div className="pointer-events-none">
+                        <PostCard post={post} previewOnly />
+                      </div>
                     </Link>
+
+                    {/* Re-render PostCard to allow button interaction */}
+                    <div className="mt-2">
+                      <PostCard post={post} interactiveOnly />
+                    </div>
                   </div>
                 ))}
               </div>
