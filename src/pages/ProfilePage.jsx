@@ -13,6 +13,7 @@ const ProfilePage = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false); // 🟡 follow state
 
   useEffect(() => {
     const auth = getAuth();
@@ -25,6 +26,7 @@ const ProfilePage = () => {
         setLoading(false);
         return;
       }
+
       const name = `${localStorage.getItem("firstName") || "User"} ${localStorage.getItem("lastName") || ""}`;
       const email = currentUser.email;
       const course = localStorage.getItem("course") || "Not Provided";
@@ -70,6 +72,14 @@ const ProfilePage = () => {
             .then((data) => setPosts(data.posts || []))
             .catch((err) => console.error("Failed to load posts", err));
 
+          // 🟡 Check if current user is following this profile
+          const localUser = JSON.parse(localStorage.getItem("user"));
+          if (localUser && localUser.email) {
+            const followRes = await fetch(`http://localhost:8000/api/follow/status/?follower=${localUser.email}&followed=${data.email}`);
+            const followData = await followRes.json();
+            setIsFollowing(followData.is_following);
+          }
+
           setLoading(false);
         } catch (err) {
           console.error(err);
@@ -81,10 +91,6 @@ const ProfilePage = () => {
       fetchOtherUser();
     }
   }, [id]);
-
-  if (loading) return <div className="text-center mt-6">Loading...</div>;
-  if (error) return <div className="text-center text-red-500 mt-6">{error}</div>;
-  if (!user) return <div className="text-center text-red-500 mt-6">User not found</div>;
 
   const handleImageUpload = async (event) => {
     if (!isOwner) return;
@@ -114,15 +120,39 @@ const ProfilePage = () => {
     if (window.confirm("Are you sure you want to delete your account? This cannot be undone.")) {
       try {
         await deleteUser(currentUser);
-        localStorage.removeItem("user");
-        localStorage.removeItem("course");
-        localStorage.setItem("isAuthenticated", "false");
+        localStorage.clear();
         navigate("/register");
       } catch (err) {
         alert("Error deleting account. Please log in again and try.");
       }
     }
   };
+
+  // 🟡 Follow/Unfollow button handler
+  const toggleFollow = async () => {
+    const currentUser = JSON.parse(localStorage.getItem("user"));
+    if (!currentUser || !currentUser.email || !user?.email) return;
+
+    const endpoint = isFollowing ? "unfollow" : "follow";
+    const response = await fetch(`http://localhost:8000/api/${endpoint}/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        follower: currentUser.email,
+        followed: user.email,
+      }),
+    });
+
+    if (response.ok) {
+      setIsFollowing(!isFollowing);
+    } else {
+      console.error("Failed to update follow status");
+    }
+  };
+
+  if (loading) return <div className="text-center mt-6">Loading...</div>;
+  if (error) return <div className="text-center text-red-500 mt-6">{error}</div>;
+  if (!user) return <div className="text-center text-red-500 mt-6">User not found</div>;
 
   return (
     <div className="flex flex-col items-center w-full px-6 mt-6">
@@ -160,13 +190,24 @@ const ProfilePage = () => {
           )}
         </div>
 
-        {isOwner && (
+        {isOwner ? (
           <button
             onClick={handleDeleteAccount}
             className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 flex items-center absolute right-6"
           >
             <Trash2 className="w-5 h-5 mr-1" />
             Delete Profile
+          </button>
+        ) : (
+          <button
+            onClick={toggleFollow}
+            className={`absolute right-6 px-4 py-2 rounded-lg ${
+              isFollowing
+                ? "bg-gray-300 text-black hover:bg-gray-400"
+                : "bg-blue-500 text-white hover:bg-blue-600"
+            }`}
+          >
+            {isFollowing ? "Unfollow" : "Follow"}
           </button>
         )}
       </div>

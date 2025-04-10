@@ -23,6 +23,7 @@ import NotificationsPage from "./pages/NotificationsPage";
 import ChatPage from "./pages/ChatPage";
 import SearchPage from "./pages/SearchPage";
 import SearchFiltersRightPanel from "./components/SearchFiltersRIghtPanel";
+import FollowersPage from './pages/FollowersPage';
 
 import "./App.css";
 
@@ -87,6 +88,7 @@ function AppContent({ isAuthenticated, setIsAuthenticated }) {
               isAuthenticated ? <Dashboard /> : <Navigate to="/" />
             }
           />
+          <Route path="/followers" element={<FollowersPage />} />
           <Route
             path="/posts"
             element={

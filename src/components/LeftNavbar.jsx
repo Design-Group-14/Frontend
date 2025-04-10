@@ -1,4 +1,4 @@
-import { Home, Bell, Mail, User, PlusCircle } from "lucide-react";
+import { Home, Bell, Mail, User, PlusCircle, Users } from "lucide-react"; // ✅ Add `Users` icon
 import { Link } from "react-router-dom";
 import Badge from '../assets/Badge.jpg';
 
@@ -30,6 +30,13 @@ const Navbar = ({ notificationCount }) => {
           <Link to="/messages" className="flex items-center text-gray-700 hover:text-blue-500">
             <Mail className="w-6 h-6 mr-3" />
             <span className="text-lg">Messages</span>
+          </Link>
+        </li>
+
+        <li>
+          <Link to="/followers" className="flex items-center text-gray-700 hover:text-blue-500">
+            <Users className="w-6 h-6 mr-3" />
+            <span className="text-lg">Followers</span> {/* ✅ New button */}
           </Link>
         </li>
 
