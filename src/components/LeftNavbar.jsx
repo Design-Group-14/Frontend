@@ -19,12 +19,12 @@ const Navbar = ({ notificationCount }) => {
           </Link>
         </li>
 
-        <li>
+        {/* <li>
           <Link to="/notifications" className="flex items-center text-gray-700 hover:text-blue-500 relative">
             <Bell className="w-6 h-6 mr-3" />
             <span className="text-lg">Notifications</span>
           </Link>
-        </li>
+        </li> */}
 
         <li>
           <Link to="/messages" className="flex items-center text-gray-700 hover:text-blue-500">

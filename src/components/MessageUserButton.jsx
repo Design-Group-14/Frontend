@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { createDMChannel, connectUser } from '../utils/streamChat';
 
 /**
  * A button component to initiate a direct message conversation with a user
